@@ -10,7 +10,8 @@ function validateEmail(email) {
 
 exports.Login = async function (req, res) {
   const Password = req.body.password;
-  const Email = req.body.email;
+  // const Email = req.body.email;
+  const Email =   String(req.body.email).toLowerCase();
   if (!Password || !Email) {
     return res.status(404).send({ message: "password and email is required" });
   }
