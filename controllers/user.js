@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
 
 function validateEmail(email) {
@@ -241,3 +241,11 @@ exports.ConfirmPaymentReceived = async (req, res) => {
 //       res.status(401).send({ err: "an error occured,unable to send" });
 //     });
 // };
+
+exports.SearchPhotogrAphersCloser=(req,res)=>{
+photographerSchema.find({}).select('-Password').then(resData=>{
+res.status(200).json({userData:resData})
+}).catch(err=>{
+  res.status(401).json({message:"no photographers found within"})
+})
+}

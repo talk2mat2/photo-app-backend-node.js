@@ -49,6 +49,25 @@ exports.Login = async function (req, res) {
   });
 };
 
+exports.updateMyLocation=(req,res)=>{
+console.log(req.body)
+const {lng,lat,id}=req.body
+if(!lng||!lat){
+  return res.status(501).json({message:'not updated'})
+}
+photographerSchema.findByIdAndUpdate({_id:id},
+  {
+    $set: {lat:lat,lng:lng},
+  },
+  { new: true, useFindAndModify: false }
+  ).then(resdata=>{
+this.UpdateClient(req,res)
+}).catch(err=>{
+  console.log(err)
+  return res.status(501).json({message:'an error occured ,thats all we know'})
+})
+}
+
 exports.CheckIsRegistered = (req, res) => {
   const Email =   String(req.body.email).toLowerCase();
 
@@ -100,12 +119,25 @@ exports.Register = async (req, res) => {
 
   try {
     const Passwordhash = bcrypt.hashSync(Password, 10);
-    const newUser = new photographerSchema({
-      Email,
-      Password: Passwordhash,
-      lname,fname,mobile
-    });
-    await newUser.save();
+   
+    if(req.body.lat&&req.body.lng){
+      const newUser = new photographerSchema({
+        Email,
+        Password: Passwordhash,
+        lname,fname,mobile,lng:req.body.lng,lat:req.body.lat
+      });
+      await newUser.save();
+    }
+    else{
+      const newUser = new photographerSchema({
+        Email,
+        Password: Passwordhash,
+        lname,fname,mobile
+      });
+      await newUser.save();
+    }
+
+  
     //first level referrer
     //authenticate user here Login
     this.Login(req, res);
@@ -154,7 +186,7 @@ exports.Register = async (req, res) => {
 // };
 
 exports.UpdateClient = (req, res) => {
-  photographerSchema.findById(req.body.id)
+  photographerSchema.findById(req.body.id).select('-Password')
     .then((user) => {
       return res.json({
         userData: user,

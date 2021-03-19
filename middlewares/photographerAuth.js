@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const UserSchema = require("../models/userMoodel");
 
-exports.CheckUserAth = async function (req, res, next) {
+exports.CheckPhtotoAth = async function (req, res, next) {
   const token = req.headers.authorization;
 
   jwt.verify(token, process.env.JWTKEY, async function (err, decodedToken) {

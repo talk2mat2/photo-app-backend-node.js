@@ -13,6 +13,7 @@ const {
   CheckIsRegistered,
   UpdateClient,
   ConfirmPaymentReceived,
+  SearchPhotogrAphersCloser
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -22,5 +23,6 @@ Router.post("/Register", Register);
 Router.post("/ConfirmPaymentReceived", CheckUserAth, ConfirmPaymentReceived);
 Router.post("/UpdateMyAcctNumber", CheckUserAth, UpdateMyAcctNumber);
 Router.post("/CheckIsRegistered", CheckIsRegistered);
+Router.post("/SearchPhotogrAphersCloser", SearchPhotogrAphersCloser);
 
 module.exports = Router;

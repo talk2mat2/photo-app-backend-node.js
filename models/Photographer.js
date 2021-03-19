@@ -11,7 +11,8 @@ const photographerSchema = new Schema({
   mobile:{type:String},
   isPhotographer:{type:Boolean,default:true},
   lng:{type:Number},
-  lat:{type:Number}
+  lat:{type:Number},
+  locationName:{type:String}
 
 });
 //if the confirm 4 payment, you remove yourself from the board
