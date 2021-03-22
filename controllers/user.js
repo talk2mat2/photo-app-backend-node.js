@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
+// const {Findistance}= require('../middlewares/FindDistance`')
+const haversine = require("haversine");
 
 function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -243,9 +245,42 @@ exports.ConfirmPaymentReceived = async (req, res) => {
 // };
 
 exports.SearchPhotogrAphersCloser=(req,res)=>{
-photographerSchema.find({}).select('-Password').then(resData=>{
-res.status(200).json({userData:resData})
-}).catch(err=>{
-  res.status(401).json({message:"no photographers found within"})
+  const CurrentUser=req.body.sesionlocation
+
+photographerSchema.find({}).select('-Password').limit(7).then(
+  async (response) => {
+    console.log(response.length);
+    await response.map(async (user, index) => {
+      if (
+        user.lng &
+        user.lat&
+        CurrentUser.lng &
+        CurrentUser.lat
+      ) {
+        //here we check distance of search resulte users to the current user
+        const userdistance = await haversine(
+          {
+            latitude: CurrentUser.lat,
+            longitude: CurrentUser.lng,
+          },
+          { latitude: user.lat, longitude: user.lng },
+          { unit: "meter" }
+        );
+         response[index].distance = userdistance;
+        console.log(user.distance);
+      
+      }
+   
+      // else{
+      //   return res.status(401).send({ message: 'one or more needed parameters not provided for distance calculation' });
+      // }
+    });
+    return res.status(200).json({ userData: response });
+    // response.totalRecords=totalCount
+  
+  }
+
+).catch(err=>{
+  return res.status(401).json({message:"no photographers found within"})
 })
 }

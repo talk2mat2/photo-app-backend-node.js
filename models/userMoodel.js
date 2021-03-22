@@ -10,7 +10,8 @@ const UserSchema = new Schema({
   lname:{type:String},
   mobile:{type:String},
   lng:{type:Number},
-  lat:{type:Number}
+  lat:{type:Number},
+  wallet:{type:Number,default:0}
 
 });
 //if the confirm 4 payment, you remove yourself from the board

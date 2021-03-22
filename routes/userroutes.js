@@ -23,6 +23,6 @@ Router.post("/Register", Register);
 Router.post("/ConfirmPaymentReceived", CheckUserAth, ConfirmPaymentReceived);
 Router.post("/UpdateMyAcctNumber", CheckUserAth, UpdateMyAcctNumber);
 Router.post("/CheckIsRegistered", CheckIsRegistered);
-Router.post("/SearchPhotogrAphersCloser", SearchPhotogrAphersCloser);
+Router.post("/SearchPhotogrAphersCloser",CheckUserAth, SearchPhotogrAphersCloser);
 
 module.exports = Router;
