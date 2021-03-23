@@ -13,7 +13,8 @@ const photographerSchema = new Schema({
   lng:{type:Number},
   lat:{type:Number},
   locationName:{type:String},
-  distance:{type:Number}
+  distance:{type:Number},
+  newBooking:{type:Boolean,default:false},
 
 });
 //if the confirm 4 payment, you remove yourself from the board

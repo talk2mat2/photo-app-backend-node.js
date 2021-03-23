@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
+const PhotoSession= require('../models/PhotoSession')
 // const {Findistance}= require('../middlewares/FindDistance`')
 const haversine = require("haversine");
 
@@ -284,3 +285,37 @@ photographerSchema.find({}).select('-Password').limit(7).then(
   return res.status(401).json({message:"no photographers found within"})
 })
 }
+
+
+exports.bookSession=(req,res)=>{
+  const {phographerId,id} = req.body
+  console.log(phographerId,id)
+if(!phographerId){
+  return res.status(404).json({message:"no photographers selected"})
+}
+if(!id){
+  return res.status(404).json({message:"no user provided"})
+}
+
+else{
+  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId})
+  booknow.save((err,success)=>{
+    if(err){
+      return console.log(err)
+    }
+    else{
+      console.log("booked")
+    }
+    
+  })
+photographerSchema.findById(phographerId).then(async (item)=>{
+  item.newBooking= true
+  await item.save()
+})
+  return res.status(200).json({message:"booked"})
+}
+}
+
+
+// bookedById: {type: mongoose.Schema.Types.ObjectId, ref: 'UserSchema'},
+// photographeriD: {type: mongoose.Schema.Types.ObjectId, ref: 'photographerSchema'},

@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const photographerSchema = require("../models/Photographer");
+const PhotoSession= require('../models/PhotoSession')
 
 function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -237,3 +238,18 @@ exports.UpdateClient = (req, res) => {
 //       res.status(401).send({ err: "an error occured,unable to send" });
 //     });
 // };
+
+exports.FectMyBookings=(req,res)=>{
+const {id}= req.body
+PhotoSession.find({photographerId:id}).populate('bookedById','-Password -wallet').then(items=>{
+  console.log(items);
+  res.status(200).json({
+    userData:items,
+  });
+}).catch(err=>{
+  res.status(404).json({
+    error: true,
+    message: "not found",
+  });
+})
+}
