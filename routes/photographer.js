@@ -13,7 +13,10 @@ const {
 CheckIsRegistered,
 UpdateClient,
 updateMyLocation,
-FectMyBookings
+FectMyBookings,
+StartSession,
+EndSession,
+AcceptOffer
 } = require("../controllers/photographer");
 
 Router.post("/login", Login);
@@ -25,5 +28,8 @@ Router.post("/Register", Register);
 Router.post("/CheckIsRegistered", CheckIsRegistered);
 Router.post("/updateMyLocation",CheckPhtotoAth, updateMyLocation);
 Router.get("/FectMyBookings",CheckPhtotoAth, FectMyBookings);
+Router.get("/StartSession",CheckPhtotoAth, StartSession);
+Router.get("/EndSession",CheckPhtotoAth, EndSession);
+Router.get("/AcceptOffer",CheckPhtotoAth, AcceptOffer);
 
 module.exports = Router;

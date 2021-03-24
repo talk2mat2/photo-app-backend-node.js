@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+var shado = require("shado");
 
 const photographerSchema = require("../models/Photographer");
 const PhotoSession= require('../models/PhotoSession')
@@ -250,6 +251,92 @@ PhotoSession.find({photographerId:id}).populate('bookedById','-Password -wallet'
   res.status(404).json({
     error: true,
     message: "not found",
+  });
+})
+}
+
+exports.StartSession = (req,res) => {
+  console.log(req.query.id)
+  const sessionId = req.query.id;
+  if (!sessionId) {
+    return res.status(501).json({
+      error: true,
+      message: " pls provide a valid session Id",
+    });
+   
+}
+PhotoSession.findById(sessionId).then( async (item)=>{
+  let timenow = new Date()
+  if(!item.accepted){
+    console.log(item.accepted)
+    return res.status(404).json({
+      error: true,
+      message: "unable to start event not accpted",
+    });
+  }
+if(!item.timeStart) {item.timeStart =  timenow}
+await item.save()
+this.FectMyBookings(req,res)
+}).catch(err=>{
+  console.log(err)
+  res.status(404).json({
+    error: true,
+    message: "unable to start event",
+  });
+})
+}
+exports.EndSession = (req,res) => {
+  console.log(req.query.id)
+  const sessionId = req.query.id;
+  if (!sessionId) {
+    return res.status(501).json({
+      error: true,
+      message: " pls provide a valid session Id",
+    });
+   
+}
+PhotoSession.findById(sessionId).then( async (item)=>{
+  let timenow = new Date()
+  if(item.timeStart&&timenow){
+    //this module helps us to get time different between two time stamp in iso formay
+const sessionDuration = await shado.date.set(item.timeStart, timenow).getMinutes()
+item.timeEnd =  timenow
+item.sessionDuration = sessionDuration
+item.completed = true
+await item.save()
+this.FectMyBookings(req,res)
+  }
+}).catch(err=>{
+  console.log(err)
+  res.status(404).json({
+    error: true,
+    message: "unable to end event arror ocured",
+  });
+})
+}
+exports.AcceptOffer = (req,res) => {
+  // console.log(req.query.id)
+  const sessionId = req.query.id;
+  if (!sessionId) {
+    return res.status(501).json({
+      error: true,
+      message: " pls provide a valid booked session Id",
+    });
+   
+}
+PhotoSession.findById(sessionId).then( async (item)=>{
+ 
+  if(!item.accepted){
+    //this module helps us to get time different between two time stamp in iso formay
+item.accepted =  true
+await item.save()
+this.FectMyBookings(req,res)
+  }
+}).catch(err=>{
+  console.log(err)
+  res.status(404).json({
+    error: true,
+    message: "an error occured,unable to end accept offer",
   });
 })
 }

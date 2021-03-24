@@ -316,6 +316,15 @@ photographerSchema.findById(phographerId).then(async (item)=>{
 }
 }
 
+exports.GetSesssionHistory=(req,res)=>{
+const id= req.body.id
+
+PhotoSession.find({ bookedById:id}).then(items=>{
+  res.status(200).json({userData:items})
+}).catch(err=>{
+  return res.status(401).json({message:"empty"})
+})
+}
 
 // bookedById: {type: mongoose.Schema.Types.ObjectId, ref: 'UserSchema'},
 // photographeriD: {type: mongoose.Schema.Types.ObjectId, ref: 'photographerSchema'},

@@ -14,7 +14,8 @@ const {
   UpdateClient,
   ConfirmPaymentReceived,
   SearchPhotogrAphersCloser,
-  bookSession
+  bookSession,
+  GetSesssionHistory
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -26,5 +27,6 @@ Router.post("/UpdateMyAcctNumber", CheckUserAth, UpdateMyAcctNumber);
 Router.post("/CheckIsRegistered", CheckIsRegistered);
 Router.post("/SearchPhotogrAphersCloser",CheckUserAth, SearchPhotogrAphersCloser);
 Router.post("/bookSession",CheckUserAth, bookSession);
+Router.get("/getSesssionHistory",CheckUserAth, GetSesssionHistory);
 
 module.exports = Router;
