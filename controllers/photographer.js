@@ -301,7 +301,8 @@ PhotoSession.findById(sessionId).then( async (item)=>{
     //this module helps us to get time different between two time stamp in iso formay
 const sessionDuration = await shado.date.set(item.timeStart, timenow).getMinutes()
 item.timeEnd =  timenow
-item.sessionDuration = sessionDuration
+if(sessionDuration>0){item.sessionDuration =sessionDuration}
+else{item.sessionDuration=1}
 item.completed = true
 await item.save()
 this.FectMyBookings(req,res)

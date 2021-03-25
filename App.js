@@ -23,7 +23,7 @@ App.use("/users", UserRoutes);
 App.use("/photographer", PhotographerRoutes);
 // App.use("/users", UploadRoutes);
 
-App.use(express.urlencoded({ limit: "20mb" }));
+App.use(express.urlencoded({ limit: "20mb" , extended: false}));
 App.get("/", (req, res) => {
   res.status(200).send({ message: "PhotoApp" });
 });

@@ -3,7 +3,10 @@ const bcrypt = require("bcrypt");
 const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
 const PhotoSession= require('../models/PhotoSession')
+const PriceSchema= require('../models/priceModel')
+const MessagesSchema = require('../models/messagesModel')
 // const {Findistance}= require('../middlewares/FindDistance`')
+const {GetPriceTag} = require('../middlewares/GetPriceTag')
 const haversine = require("haversine");
 
 function validateEmail(email) {
@@ -37,7 +40,7 @@ exports.Login = async function (req, res) {
 
       if (!match) {
         return res
-          .status(401)
+          .status(501)
           .json({ message: "Error! , the entered password is not correct." });
       } else {
         user.Password = null;
@@ -150,14 +153,14 @@ exports.UpdateMyAcctNumber = async (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(401).send({ err: "an error occured,unable to send" });
+      res.status(501).send({ err: "an error occured,unable to send" });
     });
   // bank_Name: { type: String },
   // bank_Acct_Number: { type: String },
 };
 
 exports.UpdateClient = (req, res) => {
-  UserSchema.findById(req.body.id)
+  UserSchema.findById(req.body.id).select('-Password')
     .then((user) => {
       return res.json({
         userData: user,
@@ -165,7 +168,7 @@ exports.UpdateClient = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(401).send({ err: "an error occured,unable to send" });
+      res.status(501).send({ err: "an error occured,unable to send" });
     });
 };
 
@@ -282,12 +285,12 @@ photographerSchema.find({}).select('-Password').limit(7).then(
   }
 
 ).catch(err=>{
-  return res.status(401).json({message:"no photographers found within"})
+  return res.status(404).json({message:"no photographers found within"})
 })
 }
 
 
-exports.bookSession=(req,res)=>{
+exports.bookSession= async (req,res)=>{
   const {phographerId,id} = req.body
   console.log(phographerId,id)
 if(!phographerId){
@@ -298,8 +301,10 @@ if(!id){
 }
 
 else{
-  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId})
-  booknow.save((err,success)=>{
+  let pricePerMinutes = await GetPriceTag() 
+  console.log(pricePerMinutes)
+  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes})
+ await  booknow.save((err,success)=>{
     if(err){
       return console.log(err)
     }
@@ -319,12 +324,135 @@ photographerSchema.findById(phographerId).then(async (item)=>{
 exports.GetSesssionHistory=(req,res)=>{
 const id= req.body.id
 
-PhotoSession.find({ bookedById:id}).then(items=>{
+PhotoSession.find({ bookedById:id}).populate('photographerId','-Password -newBooking -isPhotographer').then(items=>{
   res.status(200).json({userData:items})
 }).catch(err=>{
-  return res.status(401).json({message:"empty"})
+  return res.status(404).json({message:"empty"})
 })
 }
 
 // bookedById: {type: mongoose.Schema.Types.ObjectId, ref: 'UserSchema'},
 // photographeriD: {type: mongoose.Schema.Types.ObjectId, ref: 'photographerSchema'},
+
+// exports.FetchMessages = (req,res)=>{
+//   const id = req.body
+
+//   MessagesSchema.find({sender:id}).populate().populate().then(items=>{
+//     return res.status(200).json({ userData: items });
+//   }).catch(err=>{
+//     console.log(err)
+//     return res.status(404).json({message:"empty"})
+//   })
+
+// }
+exports.sendMessages = async (req,res)=>{
+  const {sender,body, receiver} = req.body
+  let {title}=req.body
+if (!receiver || !sender){
+  return res.status(501).json({message:"receiver  or Sender cant not be blank"})
+}
+if(!title){
+  title="untitled"
+}
+if(!body){
+  return res.status(501).json({message:"message body can not be blank"})
+}
+
+else{
+  const newMessages= new MessagesSchema({ title,body,receiver,sender})
+  await newMessages.save((err,success)=>{
+    if (err){
+      console.log('unable to save',err)
+      return res.status(501).json({message:"unable to save"})
+    }
+    else{
+      return res.status(200).json({
+        message:"sent"
+      })
+    }
+  })
+}
+}
+exports.FetchMessages=(req,res)=>{
+  const id= req.body.id
+  
+  MessagesSchema.find({ receiver:id}).populate('sender','-Password -newBooking -isPhotographer -wallet')
+  .populate('receiver','-Password -newBooking -isPhotographer -wallet').then(items=>{
+    res.status(200).json({userData:items})
+  }).catch(err=>{
+    return res.status(404).json({message:"empty"})
+  })
+  }
+// exports.SendMessages = (req,res)=>{
+//   const id = req.body
+  
+
+//   MessagesSchema.find({receiver:id}).then(items=>{
+//     return res.status(200).json({ userData: items });
+//   }).catch(err=>{
+//     console.log(err)
+//     return res.status(404).json({message:"empty"})
+//   })
+
+// }
+
+exports.CreatePriceTag=async (req,res)=>{
+const userId=req.body.id
+const price=req.body.price
+if (!price){
+  return res.status(401).json({message:"pls provid price"})
+}
+UserSchema.findById(userId).then( async (user)=>{
+  
+
+  if (!user.isAdmin){
+    return res.status(401).json({message:"not authorized, admin only"})
+  }
+  if(user.isAdmin){
+    const priceTag= await PriceSchema.findOne({tag:"priceTag"})
+    
+if(!priceTag){
+  let newPriceTag= new PriceSchema({tag:'priceTag',price:price})
+  await newPriceTag.save((err,success)=>{
+    if(err){
+      console.log(err)
+      return res.status(501).json({message:"unable to create new price tag"})
+    }
+    else{
+      return res.status(200).json({message:"price created"})
+    }
+  })
+  }
+  else{
+    priceTag.price=price
+    await priceTag.save()
+    console.log('saved')
+    return res.status(200).json({message:'price updated'})
+         }
+   
+  }
+}).catch(err=>{
+  console.log(err)
+  return res.status(501).json({message:"unable to perfom the requested operation"})
+})
+
+}
+
+
+// if(!priceTag){
+//   let newPriceTag= new PriceSchema({tag:'priceTag',price:price})
+//   await newPriceTag.save((err,success)=>{
+//     if(err){
+//       return res.status(501).json({message:"unable to create new price tag"})
+//     }
+//     else{
+//       return res.status(200).json({message:"price created"})
+//     }
+//   })
+//   }
+//   else{
+//     priceTag.price=price
+//     await priceTag.sav
+//     console.log(saved)
+//     return res.status(200).json({message:'price updated'})
+//          }

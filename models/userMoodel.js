@@ -11,7 +11,8 @@ const UserSchema = new Schema({
   mobile:{type:String},
   lng:{type:Number},
   lat:{type:Number},
-  wallet:{type:Number,default:0}
+  wallet:{type:Number,default:0},
+  isAdmin:{type:Boolean}
 
 });
 //if the confirm 4 payment, you remove yourself from the board

@@ -15,7 +15,10 @@ const {
   ConfirmPaymentReceived,
   SearchPhotogrAphersCloser,
   bookSession,
-  GetSesssionHistory
+  GetSesssionHistory,
+  FetchMessages,
+  sendMessages,
+  CreatePriceTag
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -28,5 +31,8 @@ Router.post("/CheckIsRegistered", CheckIsRegistered);
 Router.post("/SearchPhotogrAphersCloser",CheckUserAth, SearchPhotogrAphersCloser);
 Router.post("/bookSession",CheckUserAth, bookSession);
 Router.get("/getSesssionHistory",CheckUserAth, GetSesssionHistory);
+Router.get("/FetchMessages",CheckUserAth, FetchMessages);
+Router.post("/sendMessages",CheckUserAth, sendMessages);
+Router.post("/CreatePriceTag",CheckUserAth, CreatePriceTag);
 
 module.exports = Router;

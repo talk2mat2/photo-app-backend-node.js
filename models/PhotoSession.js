@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const { Schema } = mongoose;
 const shortid = require("shortid");
+const PriceSchema= require('./priceModel')
+
+
+
 
 const PhotoSession = new Schema({
   bookedById: {type: mongoose.Schema.Types.ObjectId, ref: 'Users'},
@@ -12,6 +16,7 @@ timeStart:{ type: Date },
 timeEnd:{ type: Date},
 sessionDuration:{type:Number},
   accepted:{ type: Boolean, default: false },
+  pricePerMinutes:{ type:Number}
 });
 
 
