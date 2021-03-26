@@ -291,10 +291,13 @@ photographerSchema.find({}).select('-Password').limit(7).then(
 
 
 exports.bookSession= async (req,res)=>{
-  const {phographerId,id} = req.body
-  console.log(phographerId,id)
+  const {phographerId,id,address} = req.body
+  console.log(req.body)
 if(!phographerId){
   return res.status(404).json({message:"no photographers selected"})
+}
+if(!address){
+  return res.status(404).json({message:"provide location address"})
 }
 if(!id){
   return res.status(404).json({message:"no user provided"})
@@ -303,7 +306,7 @@ if(!id){
 else{
   let pricePerMinutes = await GetPriceTag() 
   console.log(pricePerMinutes)
-  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes})
+  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes,address:address})
  await  booknow.save((err,success)=>{
     if(err){
       return console.log(err)
@@ -427,7 +430,7 @@ if(!priceTag){
     priceTag.price=price
     await priceTag.save()
     console.log('saved')
-    return res.status(200).json({message:'price updated'})
+    return res.status(200).json({userData:price})
          }
    
   }
@@ -436,6 +439,24 @@ if(!priceTag){
   return res.status(501).json({message:"unable to perfom the requested operation"})
 })
 
+}
+
+exports.GetPricePriceTag=async (req,res)=>{
+PriceSchema.findOne({tag:"priceTag"}).then(item=>{
+  return res.status(200).json({userData:{price:item.price}})
+}).catch(err=>{
+  return res.status(404).json({message:"requested price tag not available"})
+})
+}
+exports.CountUsersAndPhotgraphers=async (req,res)=>{
+UserSchema.find().then( async (item)=>{
+  
+  const photgraphers= await photographerSchema.find()
+ 
+  return res.status(200).json({userData:{usersCount:item.length,phographersCount:photgraphers.length}})
+}).catch(err=>{
+  return res.status(404).json({message:"requested operation can not completed"})
+})
 }
 
 

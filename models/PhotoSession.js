@@ -16,7 +16,8 @@ timeStart:{ type: Date },
 timeEnd:{ type: Date},
 sessionDuration:{type:Number},
   accepted:{ type: Boolean, default: false },
-  pricePerMinutes:{ type:Number}
+  pricePerMinutes:{ type:Number},
+  address:{ type:String}
 });
 
 

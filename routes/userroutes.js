@@ -18,7 +18,9 @@ const {
   GetSesssionHistory,
   FetchMessages,
   sendMessages,
-  CreatePriceTag
+  CreatePriceTag,
+  GetPricePriceTag,
+  CountUsersAndPhotgraphers
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -34,5 +36,7 @@ Router.get("/getSesssionHistory",CheckUserAth, GetSesssionHistory);
 Router.get("/FetchMessages",CheckUserAth, FetchMessages);
 Router.post("/sendMessages",CheckUserAth, sendMessages);
 Router.post("/CreatePriceTag",CheckUserAth, CreatePriceTag);
+Router.get("/GetPricePriceTag", GetPricePriceTag);
+Router.get("/CountUsersAndPhotgraphers", CountUsersAndPhotgraphers);
 
 module.exports = Router;
