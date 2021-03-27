@@ -477,3 +477,38 @@ UserSchema.find().then( async (item)=>{
 //     console.log(saved)
 //     return res.status(200).json({message:'price updated'})
 //          }
+
+exports.SearchUsers = (req, res) => {
+  if (!req.query.search) {
+    console.log("empty search");
+    return res.status(200).json({ searchResults: [] });
+  }
+  console.log(req.query.search);
+  UserSchema.find({ Email: { $regex: `${req.query.search}`, $options: "i" } }).select('-Password')
+    .limit(6)
+    .then((resdata) => {
+      // console.log(resdata);
+      res.status(200).json({ userData: resdata });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(501).json({ message: 'an error occured' });
+    });
+};
+exports.SearchPhotographers = (req, res) => {
+  if (!req.query.search) {
+    console.log("empty search");
+    return res.status(200).json({ searchResults: [] });
+  }
+  console.log(req.query.search);
+  photographerSchema.find({ Email: { $regex: `${req.query.search}`, $options: "i" } }).select('-Password')
+    .limit(6)
+    .then((resdata) => {
+      // console.log(resdata);
+      res.status(200).json({ userData: resdata });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(501).json({ message: 'an error occured' });
+    });
+};

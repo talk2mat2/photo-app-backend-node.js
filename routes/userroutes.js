@@ -20,7 +20,9 @@ const {
   sendMessages,
   CreatePriceTag,
   GetPricePriceTag,
-  CountUsersAndPhotgraphers
+  CountUsersAndPhotgraphers,
+  SearchUsers ,
+  SearchPhotographers
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -38,5 +40,7 @@ Router.post("/sendMessages",CheckUserAth, sendMessages);
 Router.post("/CreatePriceTag",CheckUserAth, CreatePriceTag);
 Router.get("/GetPricePriceTag", GetPricePriceTag);
 Router.get("/CountUsersAndPhotgraphers", CountUsersAndPhotgraphers);
+Router.get("/SearchUsers", CheckUserAth, SearchUsers );
+Router.get("/SearchPhotographers", CheckUserAth, SearchPhotographers );
 
 module.exports = Router;
