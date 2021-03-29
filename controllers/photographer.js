@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 var shado = require("shado");
-
+const sendNotification = require('../middlewares/onesignal')
 const photographerSchema = require("../models/Photographer");
 const PhotoSession= require('../models/PhotoSession')
 
@@ -331,7 +331,20 @@ PhotoSession.findById(sessionId).then( async (item)=>{
     //this module helps us to get time different between two time stamp in iso formay
 item.accepted =  true
 await item.save()
-this.FectMyBookings(req,res)
+try{ 
+    let message = { 
+      app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+      contents: {"en": 'Your request has been accepted by the photographer/videographer, check your session history for information'},
+      include_external_user_ids: [item.bookedById]
+    };
+    
+    await sendNotification(message)
+   console.log('item.bookedById',item.bookedById)
+ }
+catch(err){
+  console.log(err)
+}
+finally{this.FectMyBookings(req,res)}
   }
 }).catch(err=>{
   console.log(err)

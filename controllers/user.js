@@ -308,28 +308,45 @@ else{
   let pricePerMinutes = await GetPriceTag() 
   console.log(pricePerMinutes)
   const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes,address:address})
- await  booknow.save( async (err,success)=>{
-    if(err){
-      return console.log(err)
-    }
-    else{
-      console.log("booked")
-      let message = { 
+ await  booknow.save(
+  //   async (err,success)=>{
+  //   if(err){
+  //     return console.log(err)
+  //   }
+  //   else{
+  //     console.log("booked")
+  //     let message = { 
+  //       app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+  //       contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
+  //       include_external_user_ids: [phographerId]
+  //     };
+      
+  //     await sendNotification(message)
+  //    return  res.status(200).json({message:'booked success'})
+  //   }
+    
+  // }
+  )
+  try{ 
+       let message = { 
         app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
         contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
         include_external_user_ids: [phographerId]
       };
-      
-      await sendNotification(message)
-     return  res.status(200).json({message:'booked success'})
-    }
     
+    await sendNotification(message)
+   console.log('item.bookedById',item.bookedById)
+ }
+catch(err){
+  console.log(err)
+}
+finally{
+  photographerSchema.findById(phographerId).then(async (item)=>{
+    item.newBooking= true
+    await item.save()
   })
-photographerSchema.findById(phographerId).then(async (item)=>{
-  item.newBooking= true
-  await item.save()
-})
-  return res.status(200).json({message:"booked"})
+    return res.status(200).json({message:"booked"})
+}
 }
 }
 
@@ -522,10 +539,10 @@ exports.SearchPhotographers = (req, res) => {
       res.status(501).json({ message: 'an error occured' });
     });
 };
-var message = { 
-  app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
-  contents: {"en": "sup"},
-  include_external_user_ids: ["605e17222839b416d88c0b31"]
-};
+// var message = { 
+//   app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+//   contents: {"en": "sup"},
+//   include_external_user_ids: ["605e17222839b416d88c0b31"]
+// };
 
 // sendNotification(message)
