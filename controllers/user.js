@@ -8,6 +8,7 @@ const MessagesSchema = require('../models/messagesModel')
 // const {Findistance}= require('../middlewares/FindDistance`')
 const {GetPriceTag} = require('../middlewares/GetPriceTag')
 const haversine = require("haversine");
+const sendNotification = require('../middlewares/onesignal')
 
 function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -307,12 +308,20 @@ else{
   let pricePerMinutes = await GetPriceTag() 
   console.log(pricePerMinutes)
   const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes,address:address})
- await  booknow.save((err,success)=>{
+ await  booknow.save( async (err,success)=>{
     if(err){
       return console.log(err)
     }
     else{
       console.log("booked")
+      let message = { 
+        app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+        contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
+        include_external_user_ids: [phographerId]
+      };
+      
+      await sendNotification(message)
+     return  res.status(200).json({message:'booked success'})
     }
     
   })
@@ -496,6 +505,7 @@ exports.SearchUsers = (req, res) => {
     });
 };
 exports.SearchPhotographers = (req, res) => {
+  
   if (!req.query.search) {
     console.log("empty search");
     return res.status(200).json({ searchResults: [] });
@@ -512,3 +522,10 @@ exports.SearchPhotographers = (req, res) => {
       res.status(501).json({ message: 'an error occured' });
     });
 };
+var message = { 
+  app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+  contents: {"en": "sup"},
+  include_external_user_ids: ["605e17222839b416d88c0b31"]
+};
+
+// sendNotification(message)
