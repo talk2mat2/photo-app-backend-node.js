@@ -335,7 +335,7 @@ else{
       };
     
     await sendNotification(message)
-   console.log('item.bookedById',item.bookedById)
+  //  console.log('item.bookedById',item.bookedById)
  }
 catch(err){
   console.log(err)
@@ -375,7 +375,8 @@ PhotoSession.find({ bookedById:id}).populate('photographerId','-Password -newBoo
 
 // }
 exports.sendMessages = async (req,res)=>{
-  const {sender,body, receiver} = req.body
+  const {body, receiver} = req.body
+  const sender = req.body.id
   let {title}=req.body
 if (!receiver || !sender){
   return res.status(501).json({message:"receiver  or Sender cant not be blank"})
