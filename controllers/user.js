@@ -2,13 +2,13 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
-const PhotoSession= require('../models/PhotoSession')
-const PriceSchema= require('../models/priceModel')
-const MessagesSchema = require('../models/messagesModel')
+const PhotoSession = require("../models/PhotoSession");
+const PriceSchema = require("../models/priceModel");
+const MessagesSchema = require("../models/messagesModel");
 // const {Findistance}= require('../middlewares/FindDistance`')
-const {GetPriceTag} = require('../middlewares/GetPriceTag')
+const { GetPriceTag } = require("../middlewares/GetPriceTag");
 const haversine = require("haversine");
-const sendNotification = require('../middlewares/onesignal')
+const sendNotification = require("../middlewares/onesignal");
 
 function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -18,7 +18,7 @@ function validateEmail(email) {
 exports.Login = async function (req, res) {
   const Password = req.body.password;
   // const Email = req.body.email;
-  const Email =   String(req.body.email).toLowerCase();
+  const Email = String(req.body.email).toLowerCase();
   if (!Password || !Email) {
     return res.status(404).send({ message: "password and email is required" });
   }
@@ -33,8 +33,7 @@ exports.Login = async function (req, res) {
     if (err) throw err;
     if (!user) {
       res.status(404).json({
-        message:
-          "this email is not registered with us",
+        message: "this email is not registered with us",
       });
     } else if (user) {
       const match = await user.verifyPassword(Password);
@@ -57,7 +56,7 @@ exports.Login = async function (req, res) {
 };
 
 exports.CheckIsRegistered = (req, res) => {
-  const Email =   String(req.body.email).toLowerCase();
+  const Email = String(req.body.email).toLowerCase();
 
   UserSchema.findOne({ Email }, async function (err, user) {
     if (err) throw err;
@@ -78,13 +77,12 @@ exports.CheckIsRegistered = (req, res) => {
 exports.Register = async (req, res) => {
   const Password = req.body.password;
   // const Email = req.body.email;
-  const Email =   String(req.body.email).toLowerCase();
-  const mobile=req.body.mobile;
-  const fname=req.body.fname
-  const lname=req.body.lname
+  const Email = String(req.body.email).toLowerCase();
+  const mobile = req.body.mobile;
+  const fname = req.body.fname;
+  const lname = req.body.lname;
 
   // email, password, mobile, fname, lname
-
 
   if (!validateEmail(Email)) {
     return res
@@ -92,7 +90,7 @@ exports.Register = async (req, res) => {
       .json({ message: "pls use a valid email address to register" });
   }
 
-  if (!Password || !Email||!lname||!fname||!mobile) {
+  if (!Password || !Email || !lname || !fname || !mobile) {
     return res.status(404).json({
       message: "oops! you didnt fill all values required,kindly try again",
     });
@@ -110,7 +108,9 @@ exports.Register = async (req, res) => {
     const newUser = new UserSchema({
       Email,
       Password: Passwordhash,
-      lname,fname,mobile
+      lname,
+      fname,
+      mobile,
     });
     await newUser.save();
     //first level referrer
@@ -161,7 +161,8 @@ exports.UpdateMyAcctNumber = async (req, res) => {
 };
 
 exports.UpdateClient = (req, res) => {
-  UserSchema.findById(req.body.id).select('-Password')
+  UserSchema.findById(req.body.id)
+    .select("-Password")
     .then((user) => {
       return res.json({
         userData: user,
@@ -249,116 +250,118 @@ exports.ConfirmPaymentReceived = async (req, res) => {
 //     });
 // };
 
-exports.SearchPhotogrAphersCloser=(req,res)=>{
-  const CurrentUser=req.body.sesionlocation
+exports.SearchPhotogrAphersCloser = (req, res) => {
+  const CurrentUser = req.body.sesionlocation;
 
-photographerSchema.find({}).select('-Password').limit(7).then(
-  async (response) => {
-    console.log(response.length);
-    await response.map(async (user, index) => {
-      if (
-        user.lng &
-        user.lat&
-        CurrentUser.lng &
-        CurrentUser.lat
-      ) {
-        //here we check distance of search resulte users to the current user
-        const userdistance = await haversine(
-          {
-            latitude: CurrentUser.lat,
-            longitude: CurrentUser.lng,
-          },
-          { latitude: user.lat, longitude: user.lng },
-          { unit: "meter" }
-        );
-         response[index].distance = userdistance;
-        console.log(user.distance);
-      
-      }
-   
-      // else{
-      //   return res.status(401).send({ message: 'one or more needed parameters not provided for distance calculation' });
-      // }
+  photographerSchema
+    .find({ lat: { $exists: true, $ne: null } })
+    .select("-Password")
+    .limit(7)
+    .then(async (response) => {
+      console.log(response.length);
+      await response.map(async (user, index) => {
+        if (user.lng & user.lat & CurrentUser.lng & CurrentUser.lat) {
+          //here we check distance of search resulte users to the current user
+          const userdistance = await haversine(
+            {
+              latitude: CurrentUser.lat,
+              longitude: CurrentUser.lng,
+            },
+            { latitude: user.lat, longitude: user.lng },
+            { unit: "meter" }
+          );
+          response[index].distance = userdistance;
+          console.log(user.distance);
+        }
+
+        // else{
+        //   return res.status(401).send({ message: 'one or more needed parameters not provided for distance calculation' });
+        // }
+      });
+      return res.status(200).json({ userData: response });
+      // response.totalRecords=totalCount
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: "no photographers found within" });
     });
-    return res.status(200).json({ userData: response });
-    // response.totalRecords=totalCount
-  
+};
+
+exports.bookSession = async (req, res) => {
+  const { phographerId, id, address } = req.body;
+  console.log(req.body);
+  if (!phographerId) {
+    return res.status(404).json({ message: "no photographers selected" });
   }
+  if (!address) {
+    return res.status(404).json({ message: "provide location address" });
+  }
+  if (!id) {
+    return res.status(404).json({ message: "no user provided" });
+  } else {
+    let pricePerMinutes = await GetPriceTag();
+    console.log(pricePerMinutes);
+    const booknow = new PhotoSession({
+      bookedById: id,
+      photographerId: phographerId,
+      pricePerMinutes: pricePerMinutes,
+      address: address,
+    });
+    await booknow
+      .save
+      //   async (err,success)=>{
+      //   if(err){
+      //     return console.log(err)
+      //   }
+      //   else{
+      //     console.log("booked")
+      //     let message = {
+      //       app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+      //       contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
+      //       include_external_user_ids: [phographerId]
+      //     };
 
-).catch(err=>{
-  return res.status(404).json({message:"no photographers found within"})
-})
-}
+      //     await sendNotification(message)
+      //    return  res.status(200).json({message:'booked success'})
+      //   }
 
-
-exports.bookSession= async (req,res)=>{
-  const {phographerId,id,address} = req.body
-  console.log(req.body)
-if(!phographerId){
-  return res.status(404).json({message:"no photographers selected"})
-}
-if(!address){
-  return res.status(404).json({message:"provide location address"})
-}
-if(!id){
-  return res.status(404).json({message:"no user provided"})
-}
-
-else{
-  let pricePerMinutes = await GetPriceTag() 
-  console.log(pricePerMinutes)
-  const booknow= new PhotoSession({bookedById:id,photographerId:phographerId, pricePerMinutes: pricePerMinutes,address:address})
- await  booknow.save(
-  //   async (err,success)=>{
-  //   if(err){
-  //     return console.log(err)
-  //   }
-  //   else{
-  //     console.log("booked")
-  //     let message = { 
-  //       app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
-  //       contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
-  //       include_external_user_ids: [phographerId]
-  //     };
-      
-  //     await sendNotification(message)
-  //    return  res.status(200).json({message:'booked success'})
-  //   }
-    
-  // }
-  )
-  try{ 
-       let message = { 
+      // }
+      ();
+    try {
+      let message = {
         app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
-        contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
-        include_external_user_ids: [phographerId]
+        contents: {
+          en:
+            "You have received a new invite for a session/invite,check your history to accept offer",
+        },
+        include_external_user_ids: [phographerId],
       };
-    
-    await sendNotification(message)
-  //  console.log('item.bookedById',item.bookedById)
- }
-catch(err){
-  console.log(err)
-}
-finally{
-  photographerSchema.findById(phographerId).then(async (item)=>{
-    item.newBooking= true
-    await item.save()
-  })
-    return res.status(200).json({message:"booked"})
-}
-}
-}
 
-exports.GetSesssionHistory=(req,res)=>{
-const id= req.body.id
+      await sendNotification(message);
+      //  console.log('item.bookedById',item.bookedById)
+    } catch (err) {
+      console.log(err);
+    } finally {
+      photographerSchema.findById(phographerId).then(async (item) => {
+        item.newBooking = true;
+        await item.save();
+      });
+      return res.status(200).json({ message: "booked" });
+    }
+  }
+};
 
-PhotoSession.find({ bookedById:id}).populate('photographerId','-Password -newBooking -isPhotographer').then(items=>{
-  res.status(200).json({userData:items})
-}).catch(err=>{
-  return res.status(404).json({message:"empty"})
-})
-}
+exports.GetSesssionHistory = (req, res) => {
+  const id = req.body.id;
+
+  PhotoSession.find({ bookedById: id })
+    .populate("photographerId", "-Password -newBooking -isPhotographer")
+    .then((items) => {
+      res.status(200).json({ userData: items });
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: "empty" });
+    });
+};
 
 // bookedById: {type: mongoose.Schema.Types.ObjectId, ref: 'UserSchema'},
 // photographeriD: {type: mongoose.Schema.Types.ObjectId, ref: 'photographerSchema'},
@@ -374,48 +377,49 @@ PhotoSession.find({ bookedById:id}).populate('photographerId','-Password -newBoo
 //   })
 
 // }
-exports.sendMessages = async (req,res)=>{
-  const {body, receiver} = req.body
-  const sender = req.body.id
-  let {title}=req.body
-if (!receiver || !sender){
-  return res.status(501).json({message:"receiver  or Sender cant not be blank"})
-}
-if(!title){
-  title="untitled"
-}
-if(!body){
-  return res.status(501).json({message:"message body can not be blank"})
-}
-
-else{
-  const newMessages= new MessagesSchema({ title,body,receiver,sender})
-  await newMessages.save((err,success)=>{
-    if (err){
-      console.log('unable to save',err)
-      return res.status(501).json({message:"unable to save"})
-    }
-    else{
-      return res.status(200).json({
-        message:"sent"
-      })
-    }
-  })
-}
-}
-exports.FetchMessages=(req,res)=>{
-  const id= req.body.id
-  
-  MessagesSchema.find({ receiver:id}).populate('sender','-Password -newBooking -isPhotographer -wallet')
-  .populate('receiver','-Password -newBooking -isPhotographer -wallet').then(items=>{
-    res.status(200).json({userData:items})
-  }).catch(err=>{
-    return res.status(404).json({message:"empty"})
-  })
+exports.sendMessages = async (req, res) => {
+  const { body, receiver } = req.body;
+  const sender = req.body.id;
+  let { title } = req.body;
+  if (!receiver || !sender) {
+    return res
+      .status(501)
+      .json({ message: "receiver  or Sender cant not be blank" });
   }
+  if (!title) {
+    title = "untitled";
+  }
+  if (!body) {
+    return res.status(501).json({ message: "message body can not be blank" });
+  } else {
+    const newMessages = new MessagesSchema({ title, body, receiver, sender });
+    await newMessages.save((err, success) => {
+      if (err) {
+        console.log("unable to save", err);
+        return res.status(501).json({ message: "unable to save" });
+      } else {
+        return res.status(200).json({
+          message: "sent",
+        });
+      }
+    });
+  }
+};
+exports.FetchMessages = (req, res) => {
+  const id = req.body.id;
+
+  MessagesSchema.find({ receiver: id })
+    .populate("sender", "-Password -newBooking -isPhotographer -wallet")
+    .populate("receiver", "-Password -newBooking -isPhotographer -wallet")
+    .then((items) => {
+      res.status(200).json({ userData: items });
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: "empty" });
+    });
+};
 // exports.SendMessages = (req,res)=>{
 //   const id = req.body
-  
 
 //   MessagesSchema.find({receiver:id}).then(items=>{
 //     return res.status(200).json({ userData: items });
@@ -426,66 +430,77 @@ exports.FetchMessages=(req,res)=>{
 
 // }
 
-exports.CreatePriceTag=async (req,res)=>{
-const userId=req.body.id
-const price=req.body.price
-if (!price){
-  return res.status(401).json({message:"pls provid price"})
-}
-UserSchema.findById(userId).then( async (user)=>{
-  
-
-  if (!user.isAdmin){
-    return res.status(401).json({message:"not authorized, admin only"})
+exports.CreatePriceTag = async (req, res) => {
+  const userId = req.body.id;
+  const price = req.body.price;
+  if (!price) {
+    return res.status(401).json({ message: "pls provid price" });
   }
-  if(user.isAdmin){
-    const priceTag= await PriceSchema.findOne({tag:"priceTag"})
-    
-if(!priceTag){
-  let newPriceTag= new PriceSchema({tag:'priceTag',price:price})
-  await newPriceTag.save((err,success)=>{
-    if(err){
-      console.log(err)
-      return res.status(501).json({message:"unable to create new price tag"})
-    }
-    else{
-      return res.status(200).json({message:"price created"})
-    }
-  })
-  }
-  else{
-    priceTag.price=price
-    await priceTag.save()
-    console.log('saved')
-    return res.status(200).json({userData:price})
-         }
-   
-  }
-}).catch(err=>{
-  console.log(err)
-  return res.status(501).json({message:"unable to perfom the requested operation"})
-})
+  UserSchema.findById(userId)
+    .then(async (user) => {
+      if (!user.isAdmin) {
+        return res.status(401).json({ message: "not authorized, admin only" });
+      }
+      if (user.isAdmin) {
+        const priceTag = await PriceSchema.findOne({ tag: "priceTag" });
 
-}
+        if (!priceTag) {
+          let newPriceTag = new PriceSchema({ tag: "priceTag", price: price });
+          await newPriceTag.save((err, success) => {
+            if (err) {
+              console.log(err);
+              return res
+                .status(501)
+                .json({ message: "unable to create new price tag" });
+            } else {
+              return res.status(200).json({ message: "price created" });
+            }
+          });
+        } else {
+          priceTag.price = price;
+          await priceTag.save();
+          console.log("saved");
+          return res.status(200).json({ userData: price });
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      return res
+        .status(501)
+        .json({ message: "unable to perfom the requested operation" });
+    });
+};
 
-exports.GetPricePriceTag=async (req,res)=>{
-PriceSchema.findOne({tag:"priceTag"}).then(item=>{
-  return res.status(200).json({userData:{price:item.price}})
-}).catch(err=>{
-  return res.status(404).json({message:"requested price tag not available"})
-})
-}
-exports.CountUsersAndPhotgraphers=async (req,res)=>{
-UserSchema.find().then( async (item)=>{
-  
-  const photgraphers= await photographerSchema.find()
- 
-  return res.status(200).json({userData:{usersCount:item.length,phographersCount:photgraphers.length}})
-}).catch(err=>{
-  return res.status(404).json({message:"requested operation can not completed"})
-})
-}
+exports.GetPricePriceTag = async (req, res) => {
+  PriceSchema.findOne({ tag: "priceTag" })
+    .then((item) => {
+      return res.status(200).json({ userData: { price: item.price } });
+    })
+    .catch((err) => {
+      return res
+        .status(404)
+        .json({ message: "requested price tag not available" });
+    });
+};
+exports.CountUsersAndPhotgraphers = async (req, res) => {
+  UserSchema.find()
+    .then(async (item) => {
+      const photgraphers = await photographerSchema.find();
 
+      return res.status(200).json({
+        userData: {
+          usersCount: item.length,
+          phographersCount: photgraphers.length,
+        },
+      });
+    })
+    .catch((err) => {
+      return res
+        .status(404)
+        .json({ message: "requested operation can not completed" });
+    });
+};
 
 // if(!priceTag){
 //   let newPriceTag= new PriceSchema({tag:'priceTag',price:price})
@@ -511,7 +526,8 @@ exports.SearchUsers = (req, res) => {
     return res.status(200).json({ searchResults: [] });
   }
   console.log(req.query.search);
-  UserSchema.find({ Email: { $regex: `${req.query.search}`, $options: "i" } }).select('-Password')
+  UserSchema.find({ Email: { $regex: `${req.query.search}`, $options: "i" } })
+    .select("-Password")
     .limit(6)
     .then((resdata) => {
       // console.log(resdata);
@@ -519,17 +535,18 @@ exports.SearchUsers = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(501).json({ message: 'an error occured' });
+      res.status(501).json({ message: "an error occured" });
     });
 };
 exports.SearchPhotographers = (req, res) => {
-  
   if (!req.query.search) {
     console.log("empty search");
     return res.status(200).json({ searchResults: [] });
   }
   console.log(req.query.search);
-  photographerSchema.find({ Email: { $regex: `${req.query.search}`, $options: "i" } }).select('-Password')
+  photographerSchema
+    .find({ Email: { $regex: `${req.query.search}`, $options: "i" } })
+    .select("-Password")
     .limit(6)
     .then((resdata) => {
       // console.log(resdata);
@@ -537,10 +554,10 @@ exports.SearchPhotographers = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res.status(501).json({ message: 'an error occured' });
+      res.status(501).json({ message: "an error occured" });
     });
 };
-// var message = { 
+// var message = {
 //   app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
 //   contents: {"en": "sup"},
 //   include_external_user_ids: ["605e17222839b416d88c0b31"]
