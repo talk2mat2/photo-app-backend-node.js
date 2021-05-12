@@ -287,7 +287,8 @@ exports.SearchPhotogrAphersCloser = (req, res) => {
 };
 
 exports.bookSession = async (req, res) => {
-  const { phographerId, id, address } = req.body;
+  const { phographerId, id, address, bookingProcess } = req.body;
+  // return console.log(req.body);
   console.log(req.body);
   if (!phographerId) {
     return res.status(404).json({ message: "no photographers selected" });
@@ -305,6 +306,7 @@ exports.bookSession = async (req, res) => {
       photographerId: phographerId,
       pricePerMinutes: pricePerMinutes,
       address: address,
+      bookingProcess: bookingProcess,
     });
     await booknow
       .save
