@@ -21,8 +21,8 @@ const {
   CreatePriceTag,
   GetPricePriceTag,
   CountUsersAndPhotgraphers,
-  SearchUsers ,
-  SearchPhotographers
+  SearchUsers,
+  SearchPhotographers,
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -32,15 +32,15 @@ Router.post("/Register", Register);
 Router.post("/ConfirmPaymentReceived", CheckUserAth, ConfirmPaymentReceived);
 Router.post("/UpdateMyAcctNumber", CheckUserAth, UpdateMyAcctNumber);
 Router.post("/CheckIsRegistered", CheckIsRegistered);
-Router.post("/SearchPhotogrAphersCloser",CheckUserAth, SearchPhotogrAphersCloser);
-Router.post("/bookSession",CheckUserAth, bookSession);
-Router.get("/getSesssionHistory",CheckUserAth, GetSesssionHistory);
-Router.get("/FetchMessages",CheckUserAth, FetchMessages);
-Router.post("/sendMessages",CheckUserAth, sendMessages);
-Router.post("/CreatePriceTag",CheckUserAth, CreatePriceTag);
+Router.post("/SearchPhotogrAphersCloser", SearchPhotogrAphersCloser);
+Router.post("/bookSession", CheckUserAth, bookSession);
+Router.get("/getSesssionHistory", CheckUserAth, GetSesssionHistory);
+Router.get("/FetchMessages", CheckUserAth, FetchMessages);
+Router.post("/sendMessages", CheckUserAth, sendMessages);
+Router.post("/CreatePriceTag", CheckUserAth, CreatePriceTag);
 Router.get("/GetPricePriceTag", GetPricePriceTag);
 Router.get("/CountUsersAndPhotgraphers", CountUsersAndPhotgraphers);
-Router.get("/SearchUsers", CheckUserAth, SearchUsers );
-Router.get("/SearchPhotographers", CheckUserAth, SearchPhotographers );
+Router.get("/SearchUsers", CheckUserAth, SearchUsers);
+Router.get("/SearchPhotographers", CheckUserAth, SearchPhotographers);
 
 module.exports = Router;

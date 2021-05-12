@@ -57,7 +57,7 @@ exports.Login = async function (req, res) {
 
 exports.CheckIsRegistered = (req, res) => {
   const Email = String(req.body.email).toLowerCase();
-
+  console.log(Email);
   UserSchema.findOne({ Email }, async function (err, user) {
     if (err) throw err;
     if (!user) {
