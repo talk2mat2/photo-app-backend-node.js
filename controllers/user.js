@@ -9,6 +9,7 @@ const MessagesSchema = require("../models/messagesModel");
 const { GetPriceTag } = require("../middlewares/GetPriceTag");
 const haversine = require("haversine");
 const sendNotification = require("../middlewares/onesignal");
+const axios = require("axios").default;
 
 function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -287,8 +288,31 @@ exports.SearchPhotogrAphersCloser = (req, res) => {
 };
 
 exports.bookSession = async (req, res) => {
-  const { phographerId, id, address, bookingProcess } = req.body;
+  const {
+    phographerId,
+    id,
+    address,
+    bookingProcess,
+    transaction_id,
+  } = req.body;
   // return console.log(req.body);
+  //verify_payment from flutterwave api before booking
+  if (!transaction_id) {
+    return res.status(404).json({ message: "payment transaction id required" });
+  }
+
+  const isPaid = await axios.get(
+    `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
+    {
+      headers: { Authorization: `Bearer ${process.env.FLUTTER_SECRET_KEY}` },
+    }
+  );
+  if (!isPaid.data.status === "success") {
+    return res
+      .status(404)
+      .json({ message: "payment wasnt successfull, try again" });
+  }
+
   console.log(req.body);
   if (!phographerId) {
     return res.status(404).json({ message: "no photographers selected" });
