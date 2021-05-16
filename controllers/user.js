@@ -12,7 +12,8 @@ const sendNotification = require("../middlewares/onesignal");
 const axios = require("axios").default;
 
 function validateEmail(email) {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
 }
 
@@ -288,13 +289,8 @@ exports.SearchPhotogrAphersCloser = (req, res) => {
 };
 
 exports.bookSession = async (req, res) => {
-  const {
-    phographerId,
-    id,
-    address,
-    bookingProcess,
-    transaction_id,
-  } = req.body;
+  const { phographerId, id, address, bookingprocess, transaction_id } =
+    req.body;
   // return console.log(req.body);
   //verify_payment from flutterwave api before booking
   if (!transaction_id) {
@@ -330,7 +326,12 @@ exports.bookSession = async (req, res) => {
       photographerId: phographerId,
       pricePerMinutes: pricePerMinutes,
       address: address,
-      bookingProcess: bookingProcess,
+      payment_Id: transaction_id,
+      bookingProcess: {
+        ...bookingprocess,
+        status: "paid",
+        payment_type: isPaid.data.data.payment_type,
+      },
     });
     await booknow
       .save
@@ -356,8 +357,7 @@ exports.bookSession = async (req, res) => {
       let message = {
         app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
         contents: {
-          en:
-            "You have received a new invite for a session/invite,check your history to accept offer",
+          en: "You have received a new invite for a session/invite,check your history to accept offer",
         },
         include_external_user_ids: [phographerId],
       };

@@ -4,8 +4,9 @@ const connectDB = require("./db/connection");
 const cors = require("cors");
 const UserRoutes = require("./routes/userroutes");
 const UploadRoutes = require("./routes/UploadRoutes");
-const PhotographerRoutes= require('./routes/photographer')
-
+const PhotographerRoutes = require("./routes/photographer");
+const userEditProfileUpload = require("./routes/userEditProfileUpload");
+const PhotographerProfileUpload = require("./routes/PhotographerProfileUpload");
 
 const path = require("path");
 
@@ -20,10 +21,12 @@ App.use(express.json({ extended: false, limit: "20mb" }));
 App.set("views", path.join(__dirname, "views"));
 App.set("view engine", "ejs");
 App.use("/users", UserRoutes);
+App.use("/users", userEditProfileUpload);
 App.use("/photographer", PhotographerRoutes);
+App.use("/photographer", PhotographerProfileUpload);
 // App.use("/users", UploadRoutes);
 
-App.use(express.urlencoded({ limit: "20mb" , extended: false}));
+App.use(express.urlencoded({ limit: "20mb", extended: false }));
 App.get("/", (req, res) => {
   res.status(200).send({ message: "PhotoApp" });
 });

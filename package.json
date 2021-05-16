@@ -23,6 +23,7 @@
     "multer": "^1.4.2",
     "shado": "^1.4.0",
     "shortid": "^2.2.16",
+    "uniqid": "^5.3.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
