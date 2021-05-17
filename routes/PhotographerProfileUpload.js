@@ -176,7 +176,7 @@ Router.post("/UploadWorks", upload.single("file"), async (req, res) => {
     await cloudinary.uploader.upload(
       Path,
       {
-        public_id: `image/${req.body.id}/works/${uniqueFilename}`,
+        public_id: `image/${userId}/works/${uniqueFilename}`,
         tags: `image`,
       },
       async function (err, image) {

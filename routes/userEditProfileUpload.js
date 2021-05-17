@@ -79,7 +79,7 @@ Router.post("/editProfileUpload", upload.single("file"), async (req, res) => {
     await cloudinary.uploader.upload(
       Path,
       {
-        public_id: `image/${req.body.id}/${uniqueFilename}`,
+        public_id: `image/${userId}/${uniqueFilename}`,
         tags: `image`,
       },
       async function (err, image) {
