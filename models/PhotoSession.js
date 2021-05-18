@@ -18,6 +18,7 @@ const PhotoSession = new Schema({
   accepted: { type: Boolean, default: false },
   pricePerMinutes: { type: Number },
   address: { type: String },
+  payment_Id: { type: String },
   bookingProcess: { type: Object },
 });
 
