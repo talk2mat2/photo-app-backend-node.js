@@ -330,29 +330,29 @@ exports.bookSession = async (req, res) => {
       bookingProcess: {
         ...bookingprocess,
         status: "paid",
+        amountPaid: isPaid.data.data.charged_amount,
         payment_type: isPaid.data.data.payment_type,
       },
     });
-    await booknow
-      .save
-      //   async (err,success)=>{
-      //   if(err){
-      //     return console.log(err)
-      //   }
-      //   else{
-      //     console.log("booked")
-      //     let message = {
-      //       app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
-      //       contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
-      //       include_external_user_ids: [phographerId]
-      //     };
+    await booknow.save();
+    //   async (err,success)=>{
+    //   if(err){
+    //     return console.log(err)
+    //   }
+    //   else{
+    //     console.log("booked")
+    //     let message = {
+    //       app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
+    //       contents: {"en": 'You have received a new invite for a session/invite,check your history to accept offer'},
+    //       include_external_user_ids: [phographerId]
+    //     };
 
-      //     await sendNotification(message)
-      //    return  res.status(200).json({message:'booked success'})
-      //   }
+    //     await sendNotification(message)
+    //    return  res.status(200).json({message:'booked success'})
+    //   }
 
-      // }
-      ();
+    // }
+
     try {
       let message = {
         app_id: "6419071e-2c4d-43b0-906c-3704961722e1",
