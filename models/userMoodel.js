@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   fname: { type: String },
   lname: { type: String },
   mobile: { type: String },
+  wallet_transaction_id: { type: String },
   lng: { type: Number },
   lat: { type: Number },
   wallet: { type: Number, default: 0 },

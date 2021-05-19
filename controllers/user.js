@@ -321,6 +321,7 @@ exports.fundWallet = async (req, res) => {
       { _id: userId },
       {
         $inc: params,
+        wallet_transaction_id: transaction_id,
       },
       { new: true, useFindAndModify: false }
     )
