@@ -320,7 +320,7 @@ exports.fundWallet = async (req, res) => {
     await UserSchema.findByIdAndUpdate(
       { _id: userId },
       {
-        $set: params,
+        $inc: params,
       },
       { new: true, useFindAndModify: false }
     )
