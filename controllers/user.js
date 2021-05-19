@@ -288,6 +288,55 @@ exports.SearchPhotogrAphersCloser = (req, res) => {
     });
 };
 
+exports.fundWallet = async (req, res) => {
+  const { transaction_id } = req.body;
+
+  const userId = req.body.id;
+
+  if (!transaction_id) {
+    return res.status(404).json({ message: "payment transaction id required" });
+  }
+  if (!userId) {
+    return res.status(404).json({ message: "no CurrentUser id provided" });
+  }
+  //we verify if the user has trully paid from paystack before givin him/her value
+  const isPaid = await axios.get(
+    `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
+    {
+      headers: { Authorization: `Bearer ${process.env.FLUTTER_SECRET_KEY}` },
+    }
+  );
+  if (!isPaid.data.status === "success") {
+    return res
+      .status(404)
+      .json({ message: "payment wasnt successfull, try again" });
+  }
+  if (isPaid.data.status === "success") {
+    // return res
+    //   .status(404)
+    //   .json({ message: "payment wasnt successfull, try again" });
+
+    const params = { wallet: isPaid.data.data.charged_amount };
+    await UserSchema.findByIdAndUpdate(
+      { _id: userId },
+      {
+        $set: params,
+      },
+      { new: true, useFindAndModify: false }
+    )
+      .select("-Password")
+      .then((user) => {
+        return res.json({
+          userData: user,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(501).send({ err: "an error occured,unable update wallet" });
+      });
+  }
+};
+
 exports.bookSession = async (req, res) => {
   const { phographerId, id, address, bookingprocess, transaction_id } =
     req.body;

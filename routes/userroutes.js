@@ -23,6 +23,7 @@ const {
   CountUsersAndPhotgraphers,
   SearchUsers,
   SearchPhotographers,
+  fundWallet,
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -42,5 +43,6 @@ Router.get("/GetPricePriceTag", GetPricePriceTag);
 Router.get("/CountUsersAndPhotgraphers", CountUsersAndPhotgraphers);
 Router.get("/SearchUsers", CheckUserAth, SearchUsers);
 Router.get("/SearchPhotographers", CheckUserAth, SearchPhotographers);
+Router.post("/fundWallet", CheckUserAth, fundWallet);
 
 module.exports = Router;
