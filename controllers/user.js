@@ -563,11 +563,13 @@ exports.CountUsersAndPhotgraphers = async (req, res) => {
   UserSchema.find()
     .then(async (item) => {
       const photgraphers = await photographerSchema.find();
+      const Bookings = await PhotoSession.find();
 
       return res.status(200).json({
         userData: {
           usersCount: item.length,
           phographersCount: photgraphers.length,
+          bookingsCount: bookings.length,
         },
       });
     })
