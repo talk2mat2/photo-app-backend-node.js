@@ -569,7 +569,7 @@ exports.CountUsersAndPhotgraphers = async (req, res) => {
         userData: {
           usersCount: item.length,
           phographersCount: photgraphers.length,
-          bookingsCount: bookings.length,
+          bookingsCount: Bookings.length,
         },
       });
     })
