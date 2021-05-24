@@ -11,7 +11,7 @@ const Router = express.Router();
 // const userSchema = require("../models/userMoodel");
 const photographerSchema = require("../models/Photographer");
 process.env.NODE_ENV !== "production" ? require("dotenv").config() : null;
-// const TempRegSchema = require("../models/tempRegModel");
+const EditPhotoRequest = require("../models/editPhotoRequest");
 const { UpdateClient } = require("../controllers/photographer");
 
 cloudinary.config({
@@ -245,4 +245,123 @@ Router.post("/UploadWorks", upload.single("file"), async (req, res) => {
     });
   }
 });
+
+Router.post("/submiteShoots", upload.array("file"), async (req, res) => {
+  // console.log(req.body);
+  console.log("file is", req.files.length);
+  const file = req.files;
+  const { userData } = req.body;
+  const DataInfo = JSON.parse(userData);
+  const Email = DataInfo.email;
+  const mobile = DataInfo.mobile;
+  const name = DataInfo.name;
+  const clientId = DataInfo.clientId;
+  const photographerId = DataInfo.photographerId;
+  console.log(Email, name, mobile);
+
+  if (req.files.length < 1) {
+    return res.status(501).json({
+      message: `you didnt select image(s) `,
+    });
+  }
+  if (!photographerId) {
+    return res.status(404).json({ message: "pls provide  photographer Id" });
+  }
+  if (!clientId) {
+    return res.status(404).json({ message: "pls provide client Id" });
+  }
+
+  const uniqueFilename = `${uuidv4()}iffpre`;
+  const uploader = async (path) =>
+    await cloudinary.uploader.upload(path, {
+      public_id: `image/${photographerId}/${Email}/works/${uuidv4()}iffpre}`,
+      tags: `image`,
+    });
+
+  const urls = [];
+  const files = req.files;
+  try {
+    for (const file of files) {
+      console.log(file.originalname);
+      const Path = file.path;
+
+      const newPath = await uploader(Path);
+      urls.push({ imgUri: newPath.url });
+      // console.log(newPath.asset_id);
+      // console.log(newPath.url);
+      fs.unlinkSync(Path);
+      // console.log(urls);
+    }
+  } catch (err) {
+    return res
+      .status(501)
+      .json({ message: " error occured unable to upload images" });
+  }
+
+  // res.status(200).json({
+  //   message: "images uploaded successfully",
+  //   data: urls,
+  // });
+  const isSubmitedbefore = await EditPhotoRequest.findOne({
+    clientId: clientId,
+  });
+  if (isSubmitedbefore) {
+    isSubmitedbefore.photographerId = photographerId;
+    isSubmitedbefore.clientId = clientId;
+    isSubmitedbefore.Request_Photos = [
+      ...isSubmitedbefore.Request_Photos,
+      ...urls,
+    ];
+    await isSubmitedbefore.save();
+    return res.status(200).json({
+      message: "images has been sent to admin for onward processing",
+    });
+  } else {
+    const newSubmision = new EditPhotoRequest({
+      Request_Photos: urls,
+      photographerId: photographerId,
+      clientId: clientId,
+    });
+    await newSubmision.save();
+    return res.status(200).json({
+      message: "images has been sent to admin for onward processing",
+    });
+  }
+
+  // const isPreRegistered = await TempRegSchema.findOne({ Email: Email });
+  // if (isPreRegistered) {
+  //   const randomId = isPreRegistered.confirmationCode;
+  //   isPreRegistered.termsImageUri = urls[1]["url"];
+  //   isPreRegistered.idCardImageUri = urls[0]["url"];
+  //   await isPreRegistered.save();
+  //   // await sendmail(Email, randomId, res);
+  //   //here we alert admins that we have pre-registered await their aproval
+  //   console.log("yesss");
+  //   //send email with token again
+  //   return res.status(200).json({
+  //     message:
+  //       "your information has been sent to IFF for reviews, you will be contacted after the review via email or sms,if not you can re-apply after 24 hours",
+  //   });
+  // } else {
+  //   let randomid = uniqid();
+  //   // const newPregistered = new TempRegSchema({
+  //   //   Email,
+  //   //   confirmationCode: randomid,
+  //   //   mobile: mobile,
+  //   //   fullName: fullName,
+  //   //   termsImageUri: urls[1]["url"],
+  //   //   idCardImageUri: urls[0]["url"],
+  //   // });
+  //   // await newPregistered.save();
+  //   // return res.status(200).json({
+  //   //   message:
+  //   //     "your information has been sent to IFF for reviews, you will be contacted after the review via email or sms,if not you can re-apply after 24 hours",
+  //   // });
+  //   //sendmail with new randomid
+  //   // sendmail(Email, randomid, res);
+  //   console.log("yesss");
+  //   //here we alert admins that we have pre-registered await their aproval
+  // }
+});
+
 module.exports = Router;

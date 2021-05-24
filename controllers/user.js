@@ -4,6 +4,7 @@ const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
 const PhotoSession = require("../models/PhotoSession");
 const PriceSchema = require("../models/priceModel");
+const EditPhotoRequest = require("../models/editPhotoRequest");
 const MessagesSchema = require("../models/messagesModel");
 // const {Findistance}= require('../middlewares/FindDistance`')
 const { GetPriceTag } = require("../middlewares/GetPriceTag");
@@ -506,6 +507,28 @@ exports.FetchMessages = (req, res) => {
 
 // }
 
+exports.FecthEditPhotoRequest = async (req, res) => {
+  console.log("FecthEditPhotoRequest");
+  const userId = req.body.id;
+  if (!userId) {
+    return res.status(401).json({ message: "no user" });
+  }
+  const user = await UserSchema.findById(userId);
+
+  if (!user.isAdmin) {
+    return res.status(401).json({ message: "not authorized, admin only" });
+  }
+  await EditPhotoRequest.find({ jobcompleted: false })
+    .populate("photographerId", "-Password -newBooking -isPhotographer")
+    .populate("clientId", "-Password -wallet")
+    .then((items) => {
+      res.status(200).json({ userData: items });
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: "empty" });
+    });
+};
+
 exports.CreatePriceTag = async (req, res) => {
   const userId = req.body.id;
   const price = req.body.price;
@@ -633,6 +656,26 @@ exports.SearchPhotographers = (req, res) => {
     .catch((err) => {
       console.log(err);
       res.status(501).json({ message: "an error occured" });
+    });
+};
+exports.ReceivedPhotos = async (req, res) => {
+  if (!req.body.id) {
+    console.log("empty search");
+    return res
+      .status(401)
+      .json({ message: "not authourized to perfom the requested operation" });
+  }
+
+  await EditPhotoRequest.find({ clientId: req.body.id, Edited: true })
+    .populate("photographerId", "-Password -newBooking -isPhotographer")
+
+    .then((resdata) => {
+      // console.log(resdata);
+      res.status(200).json({ userData: resdata });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({ message: "empty" });
     });
 };
 // var message = {
