@@ -286,7 +286,8 @@ Router.post("/submiteShoots", upload.array("file"), async (req, res) => {
       const Path = file.path;
 
       const newPath = await uploader(Path);
-      urls.push({ imgUri: newPath.url });
+      console.log(newPath);
+      urls.push({ imgUri: newPath.secure_url });
       // console.log(newPath.asset_id);
       // console.log(newPath.url);
       fs.unlinkSync(Path);
