@@ -103,6 +103,8 @@ exports.Register = async (req, res) => {
   const mobile = req.body.mobile;
   const fname = req.body.fname;
   const lname = req.body.lname;
+  const state = req.body.Mystate;
+  const lga = req.body.Mylga;
 
   // email, password, mobile, fname, lname
 
@@ -112,7 +114,7 @@ exports.Register = async (req, res) => {
       .json({ message: "pls use a valid email address to register" });
   }
 
-  if (!Password || !Email || !lname || !fname || !mobile) {
+  if (!Password || !Email || !lname || !fname || !mobile || !state || !lga) {
     return res.status(404).json({
       message:
         "error occured! you didnt fill all values required,kindly try again",
@@ -138,6 +140,8 @@ exports.Register = async (req, res) => {
         mobile,
         lng: req.body.lng,
         lat: req.body.lat,
+        lga,
+        state,
       });
       await newUser.save();
     } else {
@@ -147,6 +151,8 @@ exports.Register = async (req, res) => {
         lname,
         fname,
         mobile,
+        state,
+        lga,
       });
       await newUser.save();
     }

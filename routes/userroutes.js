@@ -26,6 +26,7 @@ const {
   fundWallet,
   FecthEditPhotoRequest,
   ReceivedPhotos,
+  PhotographersBylocality,
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -48,5 +49,6 @@ Router.get("/SearchPhotographers", CheckUserAth, SearchPhotographers);
 Router.post("/fundWallet", CheckUserAth, fundWallet);
 Router.get("/FecthEditPhotoRequest", CheckUserAth, FecthEditPhotoRequest);
 Router.get("/ReceivedPhotos", CheckUserAth, ReceivedPhotos);
+Router.get("/PhotographersBylocality", PhotographersBylocality);
 
 module.exports = Router;

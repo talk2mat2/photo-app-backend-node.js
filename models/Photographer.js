@@ -12,6 +12,8 @@ const photographerSchema = new Schema({
   lng: { type: Number },
   lat: { type: Number },
   locationName: { type: String },
+  state: { type: String },
+  lga: { type: String },
   distance: { type: Number },
   newBooking: { type: Boolean, default: false },
   Porthfolio_works: [{ imgUri: String }],
