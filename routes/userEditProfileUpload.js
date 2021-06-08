@@ -9,7 +9,8 @@ const path = require("path");
 const multer = require("multer");
 const Router = express.Router();
 const userSchema = require("../models/userMoodel");
-const photographerSchema = require("../models/userMoodel");
+// const photographerSchema = require("../models/userMoodel");
+const HomepageModel = require("../models/HomepageModel");
 process.env.NODE_ENV !== "production" ? require("dotenv").config() : null;
 const EditPhotoRequest = require("../models/editPhotoRequest");
 const { UpdateClient } = require("../controllers/photographer");
@@ -263,6 +264,79 @@ Router.post("/adminuploadedits", upload.array("file"), async (req, res) => {
   //   console.log("yesss");
   //   //here we alert admins that we have pre-registered await their aproval
   // }
+});
+
+Router.post("/UpdateLatestWorks", upload.single("file"), async (req, res) => {
+  const { userData } = req.body;
+  console.log(req.file);
+  const file = req.file;
+  let imageUrl = "";
+  const DataInfo = JSON.parse(userData);
+  console.log(DataInfo);
+  const { userId } = DataInfo;
+  console.log(userId);
+
+  if (!userData) {
+    return res
+      .status(501)
+      .json({ message: "no user provided or not logged in" });
+  }
+
+  const user = await userSchema.findById({ _id: userId });
+  if (!user.isAdmin) {
+    return res.status(501).json({ message: "admin route only" });
+  }
+
+  const uploader = async (path) =>
+    await cloudinary.uploader.upload(path, {
+      public_id: `image/homepage/${uuidv4()}iffpre}`,
+      tags: `image`,
+    });
+  try {
+    const Path = file.path;
+
+    const newPath = await uploader(Path);
+    // urls.push({ imgUri: newPath.secure_url });
+    // console.log(newPath.asset_id);
+    // console.log(newPath.url);
+    fs.unlinkSync(Path);
+    // console.log(urls);
+    console.log(newPath.secure_url);
+    console.log("done");
+    // await  HomepageModel.updateOne({})
+
+    const homeTag = await HomepageModel.findOne({ tag: "homeTag" });
+
+    if (!homeTag) {
+      let newhomeTag = new HomepageModel({
+        tag: "homeTag",
+        latestWorks: [{ imgUrl: newPath.secure_url }],
+      });
+      await newhomeTag.save((err, success) => {
+        if (err) {
+          console.log(err);
+          return res.status(501).json({
+            message:
+              "unable to cperfome the requested operation, try again later",
+          });
+        } else {
+          console.log("updated");
+          return res.status(200).json({ message: "updated" });
+        }
+      });
+    } else {
+      homeTag.latestWorks = [
+        ...homeTag.latestWorks,
+        { imgUrl: newPath.secure_url },
+      ];
+      await homeTag.save();
+      console.log("saved");
+      return res.status(200).json({ message: "updated" });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(501).json({ message: "An error occured" });
+  }
 });
 
 module.exports = Router;

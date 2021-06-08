@@ -61,7 +61,14 @@ exports.updateMyLocation = (req, res) => {
     .findByIdAndUpdate(
       { _id: id },
       {
-        $set: { lat: lat, lng: lng },
+        $set: {
+          lat: lat,
+          lng: lng,
+          location: {
+            type: "Point",
+            coordinates: [lng, lat],
+          },
+        },
       },
       { new: true, useFindAndModify: false }
     )
@@ -142,6 +149,10 @@ exports.Register = async (req, res) => {
         lat: req.body.lat,
         lga,
         state,
+        location: {
+          type: "Point",
+          coordinates: [req.body.lng, req.body.lat],
+        },
       });
       await newUser.save();
     } else {

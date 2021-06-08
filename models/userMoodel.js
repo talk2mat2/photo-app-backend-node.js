@@ -18,6 +18,10 @@ const UserSchema = new Schema({
   profileImage: String,
   favouriteShoots: String,
   aboutMe: String,
+  location: {
+    type: { type: String },
+    coordinates: [Number],
+  },
 });
 //if the confirm 4 payment, you remove yourself from the board
 // handleSignup({email,password,fname,lname,mobile})
@@ -30,5 +34,5 @@ UserSchema.methods.verifyPassword = async function (Password) {
     return false;
   }
 };
-
+UserSchema.index({ location: "2dsphere" });
 module.exports = mongoose.model("Users", UserSchema);

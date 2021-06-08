@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const photographerSchema = require("../models/Photographer");
 const UserSchema = require("../models/userMoodel");
 const PhotoSession = require("../models/PhotoSession");
+const HomepageModel = require("../models/HomepageModel");
 const PriceSchema = require("../models/priceModel");
 const EditPhotoRequest = require("../models/editPhotoRequest");
 const MessagesSchema = require("../models/messagesModel");
@@ -253,34 +254,30 @@ exports.ConfirmPaymentReceived = async (req, res) => {
 //     });
 // };
 
-exports.SearchPhotogrAphersCloser = (req, res) => {
+exports.SearchPhotogrAphersCloser = async (req, res) => {
   const CurrentUser = req.body.sesionlocation;
 
-  photographerSchema
-    .find({ lat: { $exists: true, $ne: null } })
-    .select("-Password")
-    .limit(7)
+  const { lng, lat } = CurrentUser;
+  console.log(lng, lat);
+  await photographerSchema
+    .aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [lng, lat],
+          },
+          key: "location",
+          distanceField: "distance",
+        },
+      },
+      { $limit: 7 },
+      { $unset: "Password" },
+    ])
+
     .then(async (response) => {
       console.log(response.length);
-      await response.map(async (user, index) => {
-        if (user.lng & user.lat & CurrentUser.lng & CurrentUser.lat) {
-          //here we check distance of search resulte users to the current user
-          const userdistance = await haversine(
-            {
-              latitude: CurrentUser.lat,
-              longitude: CurrentUser.lng,
-            },
-            { latitude: user.lat, longitude: user.lng },
-            { unit: "meter" }
-          );
-          response[index].distance = userdistance;
-          console.log(user.distance);
-        }
 
-        // else{
-        //   return res.status(401).send({ message: 'one or more needed parameters not provided for distance calculation' });
-        // }
-      });
       return res.status(200).json({ userData: response });
       // response.totalRecords=totalCount
     })
@@ -432,6 +429,16 @@ exports.GetSesssionHistory = (req, res) => {
 
   PhotoSession.find({ bookedById: id })
     .populate("photographerId", "-Password -newBooking -isPhotographer")
+    .then((items) => {
+      res.status(200).json({ userData: items });
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: "empty" });
+    });
+};
+exports.GetHomePageData = (req, res) => {
+  HomepageModel.find()
+    // .populate("photographerId", "-Password -newBooking -isPhotographer")
     .then((items) => {
       res.status(200).json({ userData: items });
     })
@@ -667,7 +674,7 @@ exports.PhotographersBylocality = (req, res) => {
   photographerSchema
     .find({ state: { $regex: `${req.query.search}`, $options: "i" } })
     .select("-Password")
-    .limit(6)
+    .limit(10)
     .then((resdata) => {
       // console.log(resdata);
       res.status(200).json({ userData: resdata });
