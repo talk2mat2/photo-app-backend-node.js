@@ -1,0 +1,24 @@
+.logout-btn{
+  cursor: pointer;
+}
+
+@media(min-width:700px){
+  .user_dash_logo{
+  display: none;
+}
+	/* .floatingCard{
+		max-width: 345;
+		position: 'absolute';
+		top: '90px';
+		z-index: '999';
+		min-width: '330px';
+		min-height: '500px';
+	} */
+
+}
+
+@media(max-width: 960px){
+  .floatingCard{
+    position: relative;
+  }
+}

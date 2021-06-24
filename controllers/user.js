@@ -276,7 +276,7 @@ exports.SearchPhotogrAphersCloser = async (req, res) => {
     ])
 
     .then(async (response) => {
-      console.log(response.length);
+      console.log(response);
 
       return res.status(200).json({ userData: response });
       // response.totalRecords=totalCount

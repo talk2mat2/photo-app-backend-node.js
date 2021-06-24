@@ -27,8 +27,11 @@ App.use("/photographer", PhotographerProfileUpload);
 // App.use("/users", UploadRoutes);
 
 App.use(express.urlencoded({ limit: "20mb", extended: false }));
-App.get("/", (req, res) => {
-  res.status(200).send({ message: "PhotoApp" });
+App.use(express.static(path.join(__dirname, "./react-frontend")));
+App.get("/*", (req, res) => {
+  res
+    .status(200)
+    .sendFile(path.join(__dirname, "./react-frontend", "index.html"));
 });
 
 const server = App.listen(Port, (err, successs) => {
