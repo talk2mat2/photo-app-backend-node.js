@@ -539,6 +539,8 @@ exports.FecthEditPhotoRequest = async (req, res) => {
 exports.CreatePriceTag = async (req, res) => {
   const userId = req.body.id;
   const price = req.body.price;
+  const locationPrice = req.body.locationPrice;
+
   if (!price) {
     return res.status(401).json({ message: "pls provid price" });
   }
@@ -551,7 +553,11 @@ exports.CreatePriceTag = async (req, res) => {
         const priceTag = await PriceSchema.findOne({ tag: "priceTag" });
 
         if (!priceTag) {
-          let newPriceTag = new PriceSchema({ tag: "priceTag", price: price });
+          let newPriceTag = new PriceSchema({
+            tag: "priceTag",
+            price: price,
+            locationPrice: locationPrice,
+          });
           await newPriceTag.save((err, success) => {
             if (err) {
               console.log(err);
@@ -559,11 +565,15 @@ exports.CreatePriceTag = async (req, res) => {
                 .status(501)
                 .json({ message: "unable to create new price tag" });
             } else {
-              return res.status(200).json({ message: "price created" });
+              return res.status(200).json({
+                message: "price created",
+                userData: { price: price, locationPrice: locationPrice },
+              });
             }
           });
         } else {
           priceTag.price = price;
+          priceTag.locationPrice = locationPrice;
           await priceTag.save();
           console.log("saved");
           return res.status(200).json({ userData: price });
@@ -581,7 +591,9 @@ exports.CreatePriceTag = async (req, res) => {
 exports.GetPricePriceTag = async (req, res) => {
   PriceSchema.findOne({ tag: "priceTag" })
     .then((item) => {
-      return res.status(200).json({ userData: { price: item.price } });
+      return res.status(200).json({
+        userData: { price: item.price, locationPrice: item.locationPrice },
+      });
     })
     .catch((err) => {
       return res
