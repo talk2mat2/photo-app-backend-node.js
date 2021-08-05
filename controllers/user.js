@@ -576,7 +576,9 @@ exports.CreatePriceTag = async (req, res) => {
           priceTag.locationPrice = locationPrice;
           await priceTag.save();
           console.log("saved");
-          return res.status(200).json({ userData: price });
+          return res
+            .status(200)
+            .json({ userData: { price: price, locationPrice: locationPrice } });
         }
       }
     })
