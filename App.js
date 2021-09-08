@@ -11,7 +11,8 @@ const PhotographerProfileUpload = require("./routes/PhotographerProfileUpload");
 const path = require("path");
 
 // const UserSchema = require("./models/userMoodel");
-process.env.NODE_ENV !== "production" ? require("dotenv").config() : null;
+//process.env.NODE_ENV !== "production" ? require("dotenv").config() : null;
+require("dotenv").config(".env");
 connectDB();
 const Port = process.env.PORT || 8080;
 
