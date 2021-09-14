@@ -8124,8 +8124,8 @@ body.tt-boxed #page-section.page-classic .page-section-inner.tt-wrap {
 }
 @media (min-width: 992px) {
   body.footer-minimal-on #password-protected-section .full-height-vh {
-    height: calc(100vh - 162px) !important;
-    min-height: calc(100vh - 162px) !important;
+    height: calc(100vh - 50px) !important;
+    min-height: calc(100vh - 50px) !important;
   }
 }
 @media (max-width: 768px) {
@@ -9978,7 +9978,7 @@ body.modal-open {
 .open > .dropdown-toggle.btn-dark.focus,
 .open > .dropdown-toggle.btn-dark:focus,
 .open > .dropdown-toggle.btn-dark:hover {
-  color: #fff;
+  color: #fff !important;
   background-color: #333;
   border-color: #333;
 }
@@ -10849,8 +10849,8 @@ body.modal-open {
 /* footer minimal
 ================== */
 #footer.footer-minimal {
-  height: 80px;
-  padding: 22px 0;
+  height: 30px;
+  padding: 10px 0;
 }
 @media (max-width: 991px) {
   #footer.footer-minimal {
