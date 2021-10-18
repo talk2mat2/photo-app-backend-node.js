@@ -28,6 +28,7 @@ const {
   ReceivedPhotos,
   PhotographersBylocality,
   GetHomePageData,
+  getOurphotographers,
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -52,5 +53,6 @@ Router.get("/FecthEditPhotoRequest", CheckUserAth, FecthEditPhotoRequest);
 Router.get("/ReceivedPhotos", CheckUserAth, ReceivedPhotos);
 Router.get("/PhotographersBylocality", PhotographersBylocality);
 Router.get("/GetHomePageData", GetHomePageData);
+Router.get("/getOurphotographers", getOurphotographers);
 
 module.exports = Router;

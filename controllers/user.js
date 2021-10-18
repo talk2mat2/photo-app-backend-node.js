@@ -725,3 +725,24 @@ exports.ReceivedPhotos = async (req, res) => {
 // };
 
 // sendNotification(message)
+
+// get latest photographers registered to display on home page
+exports.getOurphotographers = async (req, res) => {
+  await photographerSchema
+    .find({})
+    .sort({ _id: -1 })
+    .limit(4)
+    .select("-Password")
+    .then((items) => {
+      console.log(items.length);
+      return res
+        .status(200)
+        .json({ userData: items, status: true, message: "success" });
+    })
+    .catch((error) => {
+      console.log(error);
+      return res
+        .status(404)
+        .json({ message: "empty or not found", userData: [], status: false });
+    });
+};
