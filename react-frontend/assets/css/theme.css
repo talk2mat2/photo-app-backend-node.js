@@ -10950,3 +10950,7 @@ body.tt-boxed #footer.footer-minimal .footer-container {
 html {
   scroll-behavior: smooth;
 }
+.detailSection{
+ 
+padding:10%;
+}

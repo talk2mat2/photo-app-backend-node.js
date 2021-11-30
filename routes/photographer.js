@@ -18,6 +18,9 @@ const {
   EndSession,
   AcceptOffer,
   DeleteWorks,
+  forgotPassword,
+  updatePasswordViaEmail,
+  reset
 } = require("../controllers/photographer");
 
 Router.post("/login", Login);
@@ -32,5 +35,8 @@ Router.get("/StartSession", CheckPhtotoAth, StartSession);
 Router.get("/EndSession", CheckPhtotoAth, EndSession);
 Router.get("/AcceptOffer", CheckPhtotoAth, AcceptOffer);
 Router.post("/DeleteWorks", CheckPhtotoAth, DeleteWorks);
+Router.post("/forgotPassword", forgotPassword);
+Router.get("/reset/:resetPasswordToken", reset);
+Router.post("/updatePasswordViaEmail", updatePasswordViaEmail);
 
 module.exports = Router;

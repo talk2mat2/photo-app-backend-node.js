@@ -14,6 +14,8 @@ const photographerSchema = new Schema({
   locationName: { type: String },
   state: { type: String },
   lga: { type: String },
+  resetPasswordToken:String,
+  resetPasswordExpires:Date,
   distance: { type: Number },
   newBooking: { type: Boolean, default: false },
   Porthfolio_works: [{ imgUri: String }],

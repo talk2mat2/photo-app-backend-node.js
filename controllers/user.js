@@ -12,6 +12,8 @@ const { GetPriceTag } = require("../middlewares/GetPriceTag");
 const haversine = require("haversine");
 const sendNotification = require("../middlewares/onesignal");
 const axios = require("axios").default;
+const crypto = require("crypto");
+const nodeMailer = require("nodemailer");
 
 function validateEmail(email) {
   const re =
@@ -734,7 +736,6 @@ exports.getOurphotographers = async (req, res) => {
     .limit(4)
     .select("-Password")
     .then((items) => {
-      console.log(items.length);
       return res
         .status(200)
         .json({ userData: items, status: true, message: "success" });
@@ -744,5 +745,150 @@ exports.getOurphotographers = async (req, res) => {
       return res
         .status(404)
         .json({ message: "empty or not found", userData: [], status: false });
+    });
+};
+
+exports.forgotPassword = async (req, res) => {
+  if (!req.body.email) {
+    return (
+      res.status(400),
+      json({ message: "no email provided", userData: "", status: false })
+    );
+  }
+  await UserSchema.findOne({ Email: req.body.email }).then(async (user) => {
+    if (!user) {
+      return res.status(400).json({
+        message: "email not associated with any account",
+        userData: "",
+        status: false,
+      });
+    } else {
+      const token = crypto.randomBytes(28).toString("hex");
+      await user.update({
+        resetPasswordToken: token,
+        resetPasswordExpires: Date.now() + 3600000,
+      });
+      // gmail transport
+      const Transporter = nodeMailer.createTransport({
+        service: `${process.env.MailService}`,
+        auth: {
+          user: `${process.env.Email}`,
+          pass: `${process.env.password}`,
+        },
+      });
+      // let Transporter = nodeMailer.createTransport({
+      //   host: "smtp-mail.outlook.com",
+      //   secureConnection: false,
+      //   port: 587,
+      //   tls: {
+      //     ciphers: "SSLv3",
+      //   },
+      //   requireTLS: true,
+      //   auth: {
+      //     user: `${process.env.Email}`,
+      //     pass: `${process.env.password}`, // here replace user and password with valid email details
+      //   },
+      // });
+      const mailOptions = {
+        from: process.env.Email,
+        to: user.Email,
+        subject: "Ogaphoto Password Reset Email Link",
+        text: `Link to password reset\n\n\n
+${process.env.WEB_URL + "/reset/" + token} \n\n
+      `,
+      };
+
+      Transporter.sendMail(mailOptions, (err, response) => {
+        if (err) {
+          console.log("error occured", err);
+          return res.status(400).json({
+            message:
+              "The server was unable to handle your request, mail send error",
+            userData: "",
+            status: false,
+          });
+        } else {
+          console.log("sent");
+          return res.status(200).json({
+            message: "email sent successfully",
+            userData: "",
+            status: false,
+          });
+        }
+      });
+    }
+  });
+
+  // end
+};
+
+exports.reset = async (req, res) => {
+  // resetPasswordToken:String,
+  console.log(req.params.resetPasswordToken);
+  await UserSchema.findOne({
+    resetPasswordToken: req.params.resetPasswordToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  }).then((user) => {
+    if (!user) {
+      return res.status(401).json({
+        message: "password reset link is invalid or has expred",
+        userData: "",
+        status: false,
+      });
+    } else {
+      return res.status(200).json({
+        message: "Link is ok",
+        userData: { email: user.Email },
+        status: false,
+      });
+    }
+  });
+};
+
+exports.updatePasswordViaEmail = async (req, res) => {
+  UserSchema.findOne({ Email: req.body.email })
+    .then(async (user) => {
+      if (user) {
+        const Passwordhash = bcrypt.hashSync(req.body.password, 10);
+        await user.updateOne({
+          Password: Passwordhash,
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        });
+      }
+    })
+    .then((response) => {
+      return res.status(200).json({
+        message: "password updated",
+
+        status: false,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(401).json({
+        message: "password reset failed",
+        userData: "",
+        status: false,
+      });
+    });
+};
+
+exports.getPhotoGraphebyId = async (req, res) => {
+  await photographerSchema
+    .findById(req.params.id).select("-Password")
+    .then((user) => {
+      return res.status(200).json({
+        message: "Link is ok",
+        userData: user,
+        status: false,
+      });
+    })
+    .catch((err) => {
+      return res.status(401).json({
+        message: "password reset failed",
+        userData: "",
+        status: false,
+      });
     });
 };

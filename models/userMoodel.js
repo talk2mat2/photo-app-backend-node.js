@@ -18,6 +18,8 @@ const UserSchema = new Schema({
   profileImage: String,
   favouriteShoots: String,
   aboutMe: String,
+  resetPasswordToken:String,
+  resetPasswordExpires:Date,
   location: {
     type: { type: String },
     coordinates: [Number],

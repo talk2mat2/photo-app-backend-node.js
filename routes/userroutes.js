@@ -8,7 +8,9 @@ const Router = express.Router();
 
 const {
   Login,
+  updatePasswordViaEmail,
   Register,
+  getPhotoGraphebyId,
   UpdateMyAcctNumber,
   CheckIsRegistered,
   UpdateClient,
@@ -29,6 +31,8 @@ const {
   PhotographersBylocality,
   GetHomePageData,
   getOurphotographers,
+  forgotPassword,
+  reset
 } = require("../controllers/user");
 
 Router.post("/login", Login);
@@ -54,5 +58,9 @@ Router.get("/ReceivedPhotos", CheckUserAth, ReceivedPhotos);
 Router.get("/PhotographersBylocality", PhotographersBylocality);
 Router.get("/GetHomePageData", GetHomePageData);
 Router.get("/getOurphotographers", getOurphotographers);
+Router.post("/forgotPassword", forgotPassword);
+Router.get("/reset/:resetPasswordToken", reset);
+Router.get("/getPhotoGraphebyId/:id", getPhotoGraphebyId);
+Router.post("/updatePasswordViaEmail", updatePasswordViaEmail);
 
 module.exports = Router;
